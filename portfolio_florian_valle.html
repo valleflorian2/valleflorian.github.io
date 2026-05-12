@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Florian Valle — Concepteur Pédagogique</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #B8860B;
+    --gold-light: #D4A017;
+    --gold-dim: rgba(184,134,11,0.15);
+    --bg: #0a0c10;
+    --bg2: #0f1117;
+    --bg3: #151820;
+    --text: #e8e4dc;
+    --text-dim: #7a7670;
+    --text-mid: #aaa69f;
+    --border: rgba(184,134,11,0.2);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    position: fixed;
+    width: 8px; height: 8px;
+    background: var(--gold);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s ease;
+  }
+  .cursor-ring {
+    position: fixed;
+    width: 32px; height: 32px;
+    border: 1px solid rgba(184,134,11,0.5);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: all 0.15s ease;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 4rem;
+    background: rgba(10,12,16,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 0.1em;
+    text-decoration: none;
+  }
+  .nav-logo span { color: var(--gold); }
+
+  .nav-links {
+    display: flex;
+    gap: 3rem;
+    list-style: none;
+  }
+  .nav-links a {
+    color: var(--text-mid);
+    text-decoration: none;
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    transition: color 0.3s;
+    position: relative;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px; left: 0;
+    width: 0; height: 1px;
+    background: var(--gold);
+    transition: width 0.3s ease;
+  }
+  .nav-links a:hover { color: var(--gold); }
+  .nav-links a:hover::after { width: 100%; }
+
+  /* HERO */
+  #accueil {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 80% 50%, rgba(184,134,11,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 60% at 10% 80%, rgba(184,134,11,0.04) 0%, transparent 50%);
+  }
+
+  .hero-line {
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 55%;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, var(--border) 20%, var(--border) 80%, transparent);
+    opacity: 0.5;
+  }
+
+  .hero-tag {
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.2s forwards;
+  }
+
+  .hero-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(4rem, 8vw, 8rem);
+    font-weight: 300;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.4s forwards;
+  }
+  .hero-name em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .hero-desc {
+    max-width: 520px;
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--text-mid);
+    font-weight: 300;
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.6s forwards;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.8s forwards;
+  }
+
+  .btn-primary {
+    padding: 0.85rem 2.5rem;
+    background: var(--gold);
+    color: var(--bg);
+    text-decoration: none;
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 500;
+    transition: all 0.3s;
+  }
+  .btn-primary:hover {
+    background: var(--gold-light);
+    transform: translateY(-2px);
+  }
+
+  .btn-outline {
+    padding: 0.85rem 2.5rem;
+    border: 1px solid var(--border);
+    color: var(--text-mid);
+    text-decoration: none;
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 500;
+    transition: all 0.3s;
+  }
+  .btn-outline:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+    transform: translateY(-2px);
+  }
+
+  .hero-scroll {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 4rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--text-dim);
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 1.2s forwards;
+  }
+  .scroll-line {
+    width: 40px;
+    height: 1px;
+    background: var(--text-dim);
+    animation: scrollPulse 2s ease infinite;
+  }
+
+  /* SECTIONS */
+  section { padding: 7rem 4rem; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 5rem;
+  }
+  .section-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 5rem;
+    font-weight: 300;
+    color: var(--border);
+    line-height: 1;
+    user-select: none;
+  }
+  .section-title-wrap {}
+  .section-eyebrow {
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.4rem;
+  }
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.8rem;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+
+  /* PROJETS */
+  #projets { background: var(--bg2); }
+
+  .projets-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+  }
+
+  .projet-card {
+    background: var(--bg3);
+    padding: 3rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s ease;
+    border: 1px solid transparent;
+  }
+  .projet-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--gold-dim) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .projet-card:hover {
+    border-color: var(--border);
+    transform: translateY(-4px);
+  }
+  .projet-card:hover::before { opacity: 1; }
+
+  .projet-card.featured {
+    grid-column: span 2;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+  }
+
+  .projet-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.1em;
+  }
+  .projet-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    font-weight: 400;
+    margin-bottom: 0.8rem;
+    line-height: 1.2;
+  }
+  .projet-org {
+    font-size: 0.75rem;
+    color: var(--gold);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+  }
+  .projet-desc {
+    font-size: 0.9rem;
+    line-height: 1.8;
+    color: var(--text-mid);
+    font-weight: 300;
+    margin-bottom: 1.5rem;
+  }
+  .projet-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .tag {
+    padding: 0.3rem 0.8rem;
+    border: 1px solid var(--border);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    transition: all 0.3s;
+  }
+  .projet-card:hover .tag {
+    border-color: rgba(184,134,11,0.4);
+    color: var(--text-mid);
+  }
+
+  .projet-visual {
+    height: 200px;
+    background: linear-gradient(135deg, var(--bg) 0%, var(--gold-dim) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .projet-visual-icon {
+    font-size: 4rem;
+    opacity: 0.4;
+  }
+  .projet-visual::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(184,134,11,0.03) 10px,
+      rgba(184,134,11,0.03) 11px
+    );
+  }
+
+  /* COMPÉTENCES */
+  #competences { background: var(--bg); }
+
+  .competences-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: start;
+  }
+
+  .comp-group { margin-bottom: 3rem; }
+  .comp-group-title {
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .comp-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .comp-name {
+    font-size: 0.9rem;
+    color: var(--text-mid);
+    font-weight: 300;
+  }
+  .comp-bar-wrap {
+    width: 120px;
+    height: 2px;
+    background: rgba(255,255,255,0.06);
+    position: relative;
+    overflow: hidden;
+  }
+  .comp-bar {
+    height: 100%;
+    background: linear-gradient(to right, var(--gold), var(--gold-light));
+    transform-origin: left;
+    animation: barGrow 1.2s ease forwards;
+    transform: scaleX(0);
+  }
+
+  .langues-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+  .langue-card {
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    text-align: center;
+    transition: all 0.3s;
+  }
+  .langue-card:hover {
+    background: var(--gold-dim);
+    border-color: var(--gold);
+  }
+  .langue-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    margin-bottom: 0.3rem;
+  }
+  .langue-level {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  .formation-timeline { position: relative; }
+  .timeline-item {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+    position: relative;
+  }
+  .timeline-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--gold);
+    border-radius: 50%;
+    margin-top: 0.4rem;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .timeline-dot::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 3px;
+    width: 1px;
+    height: calc(100% + 2rem);
+    background: var(--border);
+  }
+  .timeline-item:last-child .timeline-dot::after { display: none; }
+  .timeline-date {
+    font-size: 0.7rem;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    margin-bottom: 0.3rem;
+  }
+  .timeline-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    margin-bottom: 0.2rem;
+  }
+  .timeline-sub {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+  }
+
+  /* CONTACT */
+  #contact { background: var(--bg2); }
+
+  .contact-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: center;
+  }
+
+  .contact-phrase {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3rem;
+    font-weight: 300;
+    line-height: 1.2;
+    margin-bottom: 2rem;
+  }
+  .contact-phrase em { color: var(--gold); font-style: italic; }
+
+  .contact-sub {
+    font-size: 0.95rem;
+    color: var(--text-mid);
+    line-height: 1.8;
+    font-weight: 300;
+    margin-bottom: 3rem;
+  }
+
+  .contact-links { display: flex; flex-direction: column; gap: 1rem; }
+  .contact-link {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.2rem 1.5rem;
+    border: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--text-mid);
+    transition: all 0.3s;
+    font-size: 0.9rem;
+  }
+  .contact-link:hover {
+    border-color: var(--gold);
+    color: var(--text);
+    background: var(--gold-dim);
+    transform: translateX(8px);
+  }
+  .contact-link-icon {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+    transition: all 0.3s;
+  }
+  .contact-link:hover .contact-link-icon {
+    border-color: var(--gold);
+    background: var(--gold-dim);
+  }
+
+  .contact-deco {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .contact-circle-outer {
+    width: 320px;
+    height: 320px;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: rotateSlow 20s linear infinite;
+  }
+  .contact-circle-inner {
+    width: 220px;
+    height: 220px;
+    border: 1px solid rgba(184,134,11,0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: rotateSlow 15s linear infinite reverse;
+  }
+  .contact-initials {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 5rem;
+    font-weight: 300;
+    color: var(--gold);
+    animation: rotateSlow 20s linear infinite reverse;
+  }
+
+  /* FOOTER */
+  footer {
+    padding: 2rem 4rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+  }
+  footer span { color: var(--gold); }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes barGrow {
+    to { transform: scaleX(1); }
+  }
+  @keyframes rotateSlow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  /* Fade-in on scroll */
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: all 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#accueil" class="nav-logo">F<span>.</span>Valle</a>
+  <ul class="nav-links">
+    <li><a href="#accueil">Accueil</a></li>
+    <li><a href="#projets">Projets</a></li>
+    <li><a href="#competences">Compétences</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="accueil">
+  <div class="hero-bg"></div>
+  <div class="hero-line"></div>
+  <p class="hero-tag">Concepteur Pédagogique · E-Learning · Digital Learning</p>
+  <h1 class="hero-name">Florian<br><em>Valle</em></h1>
+  <p class="hero-desc">Je conçois des parcours de formation qui ont un impact réel — multimodaux, innovants, et toujours pensés pour ceux qui apprennent. De la scénarisation à la production, avec une vraie curiosité pour les formats immersifs.</p>
+  <div class="hero-cta">
+    <a href="#projets" class="btn-primary">Voir mes projets</a>
+    <a href="#contact" class="btn-outline">Me contacter</a>
+  </div>
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    Défiler
+  </div>
+</section>
+
+<!-- PROJETS -->
+<section id="projets">
+  <div class="section-header reveal">
+    <div class="section-num">01</div>
+    <div class="section-title-wrap">
+      <p class="section-eyebrow">Réalisations</p>
+      <h2 class="section-title">Projets</h2>
+    </div>
+  </div>
+
+  <div class="projets-grid">
+
+    <!-- Featured -->
+    <div class="projet-card featured reveal">
+      <div>
+        <p class="projet-num">001</p>
+        <h3 class="projet-title">Formation en Réalité Virtuelle — Management</h3>
+        <p class="projet-org">Campus du Lac · CCI Bordeaux · 2025</p>
+        <p class="projet-desc">Conception et pilotage d'un parcours de management immersif en réalité virtuelle — de la scénarisation pédagogique à la mise en œuvre avec Sphere VR. Gestion du projet de bout en bout en collaboration avec les équipes métier.</p>
+        <div class="projet-tags">
+          <span class="tag">Réalité virtuelle</span>
+          <span class="tag">Sphere VR</span>
+          <span class="tag">Scénarisation</span>
+          <span class="tag">Gestion de projet</span>
+        </div>
+      </div>
+      <div class="projet-visual">
+        <div class="projet-visual-icon">🥽</div>
+      </div>
+    </div>
+
+    <div class="projet-card reveal">
+      <p class="projet-num">002</p>
+      <h3 class="projet-title">Parcours Moodle Interactif</h3>
+      <p class="projet-org">Campus du Lac · 2025</p>
+      <p class="projet-desc">Refonte complète d'un parcours vidéo interactif explicatif de Moodle, intégrant des activités pédagogiques actives et une navigation intuitive.</p>
+      <div class="projet-tags">
+        <span class="tag">Moodle</span>
+        <span class="tag">VTS Editor</span>
+        <span class="tag">Vidéo interactive</span>
+      </div>
+    </div>
+
+    <div class="projet-card reveal">
+      <p class="projet-num">003</p>
+      <h3 class="projet-title">Atelier IA Générative</h3>
+      <p class="projet-org">Campus du Lac · 2025</p>
+      <p class="projet-desc">Conception et animation d'un atelier d'introduction à l'intelligence artificielle pour des équipes non-spécialistes, incluant enjeux éthiques et outils pratiques.</p>
+      <div class="projet-tags">
+        <span class="tag">IA générative</span>
+        <span class="tag">Animation</span>
+        <span class="tag">Formation</span>
+      </div>
+    </div>
+
+    <div class="projet-card reveal">
+      <p class="projet-num">004</p>
+      <h3 class="projet-title">Cours Législation Drones</h3>
+      <p class="projet-org">SDIS 33 · Master UBM · 2024</p>
+      <p class="projet-desc">Conception d'un module e-learning complet sur la législation des drones en partenariat avec le SDIS 33, réalisé avec Articulate 360.</p>
+      <div class="projet-tags">
+        <span class="tag">Articulate 360</span>
+        <span class="tag">E-learning</span>
+        <span class="tag">SDIS 33</span>
+      </div>
+    </div>
+
+    <div class="projet-card reveal">
+      <p class="projet-num">005</p>
+      <h3 class="projet-title">Plateforme Tutoriels Vidéo</h3>
+      <p class="projet-org">PXCOM · 2024</p>
+      <p class="projet-desc">Création d'une plateforme support de tutoriels vidéo — rédaction des scripts, production vidéo (Premiere Pro, After Effects) et mise en ligne.</p>
+      <div class="projet-tags">
+        <span class="tag">Adobe Premiere</span>
+        <span class="tag">After Effects</span>
+        <span class="tag">Script</span>
+      </div>
+    </div>
+
+    <div class="projet-card reveal">
+      <p class="projet-num">006</p>
+      <h3 class="projet-title">Mémoire — IA Prédictive en Éducation</h3>
+      <p class="projet-org">Université Bordeaux Montaigne · 2025</p>
+      <p class="projet-desc">Analyse critique des modèles de prédiction des résultats étudiants — enjeux éthiques, limites des algorithmes et perspectives pédagogiques.</p>
+      <div class="projet-tags">
+        <span class="tag">Recherche</span>
+        <span class="tag">IA en éducation</span>
+        <span class="tag">Éthique</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- COMPÉTENCES -->
+<section id="competences">
+  <div class="section-header reveal">
+    <div class="section-num">02</div>
+    <div class="section-title-wrap">
+      <p class="section-eyebrow">Savoir-faire</p>
+      <h2 class="section-title">Compétences</h2>
+    </div>
+  </div>
+
+  <div class="competences-layout">
+    <div>
+      <div class="comp-group reveal">
+        <p class="comp-group-title">Outils auteurs</p>
+        <div class="comp-item">
+          <span class="comp-name">Rise 360 / Articulate</span>
+          <div class="comp-bar-wrap"><div class="comp-bar" style="width:90%"></div></div>
+        </div>
+        <div class="comp-item">
+          <span class="comp-name">Genially</span>
+          <div class="comp-bar-wrap"><div class="comp-bar" style="width:85%"></div></div>
+        </div>
+        <div class="comp-item">
+          <span class="comp-name">H5P / Wooclap</span>
+          <div class="comp-bar-wrap"><div class="comp-bar" style="width:75%"></div></div>
+        </div>
+        <div class="comp-item">
+          <span class="comp-name">VTS Editor</span>
+          <div class="comp-bar-wrap"><div class="comp-bar" style="width:70%"></div></div>
+        </div>
+      </div>
+
+      <div class="comp-group reveal">
+        <p class="comp-group-title">Production média</p>
+        <div class="comp-item">
+          <span class="comp-name">Adobe Premiere Pro</span>
+          <div class="comp-bar-wrap"><div class="comp-bar" style="width:80%"></div></div>
+        </div>
+        <div class="comp-item">
+          <span class="comp-name">After Effects</span>
+          <div class="comp-bar-wrap"><div class="comp-bar" style="width:65%"></div></div>
+        </div>
+        <div class="comp-item">
+          <span class="comp-name">Photoshop / Illustrator</span>
+          <div class="comp-bar-wrap"><div class="comp-bar" style="width:70%"></div></div>
+        </div>
+        <div class="comp-item">
+          <span class="comp-name">Blender</span>
+          <div class="comp-bar-wrap"><div class="comp-bar" style="width:60%"></div></div>
+        </div>
+      </div>
+
+      <div class="comp-group reveal">
+        <p class="comp-group-title">Plateformes & LMS</p>
+        <div class="comp-item">
+          <span class="comp-name">Moodle</span>
+          <div class="comp-bar-wrap"><div class="comp-bar" style="width:85%"></div></div>
+        </div>
+        <div class="comp-item">
+          <span class="comp-name">Sphere VR</span>
+          <div class="comp-bar-wrap"><div class="comp-bar" style="width:65%"></div></div>
+        </div>
+        <div class="comp-item">
+          <span class="comp-name">HTML / CSS</span>
+          <div class="comp-bar-wrap"><div class="comp-bar" style="width:55%"></div></div>
+        </div>
+      </div>
+
+      <div class="langues-grid reveal">
+        <div class="langue-card">
+          <p class="langue-name">FR</p>
+          <p class="langue-level">Natif</p>
+        </div>
+        <div class="langue-card">
+          <p class="langue-name">EN</p>
+          <p class="langue-level">C1</p>
+        </div>
+        <div class="langue-card">
+          <p class="langue-name">DE</p>
+          <p class="langue-level">B1</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="comp-group reveal">
+        <p class="comp-group-title">Formation</p>
+        <div class="formation-timeline">
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div>
+              <p class="timeline-date">2023 — 2025</p>
+              <p class="timeline-title">Master Dispositifs Numériques Éducatifs</p>
+              <p class="timeline-sub">Université Bordeaux Montaigne · Mention Assez Bien</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div>
+              <p class="timeline-date">2020 — 2023</p>
+              <p class="timeline-title">Licence LEA Anglais-Allemand</p>
+              <p class="timeline-sub">Université Bordeaux Montaigne · Culture digitale & nouveaux médias</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div>
+              <p class="timeline-date">2017 — 2019</p>
+              <p class="timeline-title">Baccalauréat Général</p>
+              <p class="timeline-sub">Lycée Jean Moulin, Langon · Spécialité Science de l'ingénieur</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="comp-group reveal">
+        <p class="comp-group-title">Compétences clés</p>
+        <div class="comp-item"><span class="comp-name">Ingénierie pédagogique</span></div>
+        <div class="comp-item"><span class="comp-name">Scénarisation & storyboard</span></div>
+        <div class="comp-item"><span class="comp-name">Administration LMS</span></div>
+        <div class="comp-item"><span class="comp-name">IA générative appliquée</span></div>
+        <div class="comp-item"><span class="comp-name">Normes QUALIOPI</span></div>
+        <div class="comp-item"><span class="comp-name">Animation d'ateliers</span></div>
+        <div class="comp-item"><span class="comp-name">Gestion de projets</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-header reveal">
+    <div class="section-num">03</div>
+    <div class="section-title-wrap">
+      <p class="section-eyebrow">Collaboration</p>
+      <h2 class="section-title">Contact</h2>
+    </div>
+  </div>
+
+  <div class="contact-layout">
+    <div class="reveal">
+      <h3 class="contact-phrase">Construisons quelque chose <em>ensemble</em></h3>
+      <p class="contact-sub">Disponible pour des postes en conception pédagogique, digital learning ou ingénierie de formation. N'hésitez pas à me contacter pour discuter d'une opportunité.</p>
+      <div class="contact-links">
+        <a href="mailto:valle.florian2@gmail.com" class="contact-link">
+          <div class="contact-link-icon">✉</div>
+          valle.florian2@gmail.com
+        </a>
+        <a href="tel:0781733943" class="contact-link">
+          <div class="contact-link-icon">☎</div>
+          07 81 73 39 43
+        </a>
+        <a href="https://www.linkedin.com/in/florianvalle" target="_blank" class="contact-link">
+          <div class="contact-link-icon">in</div>
+          LinkedIn — Florian Valle
+        </a>
+        <a href="https://sites.google.com/view/portfoliofv/accueil" target="_blank" class="contact-link">
+          <div class="contact-link-icon">↗</div>
+          Portfolio complet
+        </a>
+      </div>
+    </div>
+    <div class="contact-deco reveal">
+      <div class="contact-circle-outer">
+        <div class="contact-circle-inner">
+          <div class="contact-initials">FV</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span>Florian Valle</span>
+  <span>Concepteur Pédagogique · E-Learning · 2026</span>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx + 'px';
+    cursor.style.top = my + 'px';
+  });
+
+  function animRing() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    ring.style.left = rx + 'px';
+    ring.style.top = ry + 'px';
+    requestAnimationFrame(animRing);
+  }
+  animRing();
+
+  document.querySelectorAll('a, button').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.style.transform = 'translate(-50%,-50%) scale(2.5)';
+      ring.style.transform = 'translate(-50%,-50%) scale(1.5)';
+      ring.style.borderColor = 'rgba(184,134,11,0.8)';
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.style.transform = 'translate(-50%,-50%) scale(1)';
+      ring.style.transform = 'translate(-50%,-50%) scale(1)';
+      ring.style.borderColor = 'rgba(184,134,11,0.5)';
+    });
+  });
+
+  // Reveal on scroll
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
