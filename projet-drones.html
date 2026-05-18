@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projet Drones — Florian Valle</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #B8860B;
+    --gold-light: #D4A017;
+    --gold-dim: rgba(184,134,11,0.15);
+    --bg: #0a0c10;
+    --bg2: #0f1117;
+    --bg3: #151820;
+    --text: #e8e4dc;
+    --text-dim: #7a7670;
+    --text-mid: #aaa69f;
+    --border: rgba(184,134,11,0.2);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    position: fixed;
+    width: 8px; height: 8px;
+    background: var(--gold);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s ease;
+  }
+  .cursor-ring {
+    position: fixed;
+    width: 32px; height: 32px;
+    border: 1px solid rgba(184,134,11,0.5);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: all 0.15s ease;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 4rem;
+    background: rgba(10,12,16,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 0.1em;
+    text-decoration: none;
+  }
+  .nav-logo span { color: var(--gold); }
+  .nav-back {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    color: var(--text-mid);
+    text-decoration: none;
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    transition: color 0.3s;
+  }
+  .nav-back:hover { color: var(--gold); }
+  .nav-back-arrow {
+    width: 24px; height: 1px;
+    background: currentColor;
+    position: relative;
+    transition: width 0.3s;
+  }
+  .nav-back-arrow::before {
+    content: '';
+    position: absolute;
+    left: 0; top: -3px;
+    width: 7px; height: 7px;
+    border-left: 1px solid currentColor;
+    border-bottom: 1px solid currentColor;
+    transform: rotate(45deg);
+  }
+  .nav-back:hover .nav-back-arrow { width: 36px; }
+
+  /* HERO */
+  .project-hero {
+    min-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 8rem 4rem 5rem;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 70% 60% at 80% 40%, rgba(184,134,11,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 50% at 5% 80%, rgba(184,134,11,0.04) 0%, transparent 50%);
+  }
+  .hero-grid-line {
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 60%;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, var(--border) 20%, var(--border) 80%, transparent);
+    opacity: 0.4;
+  }
+
+  .project-breadcrumb {
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 0.7s ease 0.2s forwards;
+  }
+  .project-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(6rem, 12vw, 14rem);
+    font-weight: 300;
+    color: var(--border);
+    line-height: 0.85;
+    position: absolute;
+    right: 4rem;
+    bottom: 4rem;
+    user-select: none;
+    letter-spacing: -0.04em;
+  }
+  .project-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.5rem, 5vw, 5rem);
+    font-weight: 300;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    max-width: 700px;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.7s ease 0.4s forwards;
+  }
+  .project-title em { color: var(--gold); font-style: italic; }
+
+  .project-meta {
+    display: flex;
+    gap: 3rem;
+    opacity: 0;
+    animation: fadeUp 0.7s ease 0.6s forwards;
+    margin-bottom: 2rem;
+  }
+  .meta-item {}
+  .meta-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 0.3rem;
+  }
+  .meta-value {
+    font-size: 0.9rem;
+    color: var(--text-mid);
+  }
+
+  .project-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    opacity: 0;
+    animation: fadeUp 0.7s ease 0.8s forwards;
+  }
+  .tag {
+    padding: 0.3rem 0.8rem;
+    border: 1px solid var(--border);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  /* SECTIONS */
+  .project-body { max-width: 1400px; margin: 0 auto; }
+
+  .content-section {
+    padding: 6rem 4rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .content-section:nth-child(even) { background: var(--bg2); }
+
+  .section-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.2rem;
+  }
+  .section-heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.4rem;
+    font-weight: 400;
+    margin-bottom: 2.5rem;
+    line-height: 1.15;
+  }
+
+  /* CONTEXTE */
+  .contexte-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2px;
+    margin-top: 3rem;
+  }
+  .contexte-card {
+    background: var(--bg3);
+    padding: 2.5rem;
+    border: 1px solid transparent;
+    transition: all 0.4s;
+    position: relative;
+    overflow: hidden;
+  }
+  .contexte-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--gold-dim), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .contexte-card:hover { border-color: var(--border); }
+  .contexte-card:hover::before { opacity: 1; }
+  .contexte-card-icon {
+    font-size: 2rem;
+    margin-bottom: 1.2rem;
+    display: block;
+  }
+  .contexte-card-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    margin-bottom: 0.8rem;
+    color: var(--gold);
+  }
+  .contexte-card-text {
+    font-size: 0.875rem;
+    color: var(--text-mid);
+    line-height: 1.8;
+    font-weight: 300;
+  }
+
+  /* DÉMARCHE TIMELINE */
+  .demarche-steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    margin-top: 3rem;
+    position: relative;
+  }
+  .demarche-steps::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--border) 20%, var(--border) 80%, transparent);
+  }
+  .step {
+    padding: 0 1.5rem;
+    padding-top: 3rem;
+    position: relative;
+    text-align: center;
+  }
+  .step-dot {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 16px; height: 16px;
+    border: 1px solid var(--gold);
+    border-radius: 50%;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .step-dot::after {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--gold);
+    border-radius: 50%;
+  }
+  .step-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.8rem;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    margin-bottom: 0.6rem;
+  }
+  .step-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    margin-bottom: 0.8rem;
+    line-height: 1.3;
+  }
+  .step-desc {
+    font-size: 0.8rem;
+    color: var(--text-mid);
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  /* EXEMPLES SLIDES */
+  .slides-intro {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--text-mid);
+    font-weight: 300;
+    max-width: 700px;
+    margin-bottom: 3rem;
+  }
+
+  .slides-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+  }
+  .slide-card {
+    background: var(--bg3);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s;
+    border: 1px solid transparent;
+    cursor: pointer;
+  }
+  .slide-card:hover {
+    border-color: var(--gold);
+    transform: translateY(-4px);
+  }
+  .slide-thumb {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: linear-gradient(135deg, #0f1117, #1a1e2a);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .slide-thumb-pattern {
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 12px,
+      rgba(184,134,11,0.03) 12px,
+      rgba(184,134,11,0.03) 13px
+    );
+  }
+  .slide-thumb-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 1rem;
+  }
+  .slide-thumb-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+  .slide-thumb-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: var(--text-mid);
+    line-height: 1.3;
+  }
+  /* Colored accent bars on slides */
+  .slide-accent {
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--gold);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .slide-card:hover .slide-accent { opacity: 1; }
+
+  .slide-info {
+    padding: 1.5rem;
+  }
+  .slide-type {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.4rem;
+  }
+  .slide-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+  }
+  .slide-desc {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  /* MODULE ARTICULATE CTA */
+  .articulate-block {
+    padding: 6rem 4rem;
+    background: var(--bg3);
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: center;
+  }
+  .articulate-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 50% 80% at 90% 50%, rgba(184,134,11,0.06) 0%, transparent 60%);
+  }
+  .articulate-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.2rem;
+  }
+  .articulate-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3rem;
+    font-weight: 300;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+  }
+  .articulate-title em { color: var(--gold); font-style: italic; }
+  .articulate-desc {
+    font-size: 0.95rem;
+    color: var(--text-mid);
+    line-height: 1.8;
+    font-weight: 300;
+    margin-bottom: 2.5rem;
+  }
+  .articulate-features {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+  .feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    transition: all 0.3s;
+  }
+  .feature-item:hover {
+    border-color: var(--gold);
+    background: var(--gold-dim);
+  }
+  .feature-icon {
+    color: var(--gold);
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+  .feature-text {
+    font-size: 0.8rem;
+    color: var(--text-mid);
+    line-height: 1.5;
+    font-weight: 300;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 2.5rem;
+    background: var(--gold);
+    color: var(--bg);
+    text-decoration: none;
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 500;
+    transition: all 0.3s;
+  }
+  .btn-primary:hover {
+    background: var(--gold-light);
+    transform: translateY(-2px);
+    gap: 1.5rem;
+  }
+  .btn-primary-arrow { transition: transform 0.3s; }
+  .btn-primary:hover .btn-primary-arrow { transform: translateX(4px); }
+
+  /* Articulate module preview mockup */
+  .articulate-preview {
+    position: relative;
+    z-index: 1;
+  }
+  .preview-browser {
+    background: #1a1e2a;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+  }
+  .browser-bar {
+    background: #0f1117;
+    padding: 0.7rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .browser-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+  .browser-url {
+    flex: 1;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 0.25rem 0.8rem;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+    margin-left: 0.5rem;
+  }
+  .browser-content {
+    padding: 0;
+    aspect-ratio: 16/10;
+    display: flex;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* LMS sidebar mockup */
+  .lms-sidebar {
+    width: 220px;
+    background: #DB061F;
+    flex-shrink: 0;
+    padding: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .lms-title {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 0.8rem;
+    line-height: 1.4;
+  }
+  .lms-progress {
+    height: 2px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 1px;
+    margin-bottom: 1rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .lms-progress::after {
+    content: '';
+    position: absolute;
+    left: 0; top: 0;
+    height: 100%;
+    width: 50%;
+    background: white;
+    border-radius: 1px;
+  }
+  .lms-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.5rem;
+    border-radius: 2px;
+    font-size: 0.55rem;
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 0.03em;
+    line-height: 1.3;
+  }
+  .lms-item.active { background: rgba(255,255,255,0.1); color: white; }
+  .lms-item.done { color: rgba(255,255,255,0.5); }
+  .lms-check {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.3);
+    flex-shrink: 0;
+  }
+  .lms-check.done-check { background: white; border-color: white; }
+  .lms-check.active-check { border-color: white; }
+
+  .lms-main {
+    flex: 1;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .lms-content-mock {
+    text-align: center;
+    padding: 1rem;
+  }
+  .lms-mock-title {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin-bottom: 0.6rem;
+  }
+  .drone-icon-mock {
+    width: 60px; height: 60px;
+    background: linear-gradient(135deg, #DB061F, #FE742E);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin: 0 auto 0.5rem;
+  }
+  .lms-mock-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.3rem;
+    margin-top: 0.5rem;
+  }
+  .lms-mock-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: #DB061F;
+    opacity: 0.3;
+  }
+  .lms-mock-dot.active-dot { opacity: 1; }
+
+  /* RÉSULTATS */
+  .resultats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    margin-top: 3rem;
+  }
+  .resultat-card {
+    background: var(--bg3);
+    padding: 2.5rem;
+    text-align: center;
+    border: 1px solid transparent;
+    transition: all 0.4s;
+    position: relative;
+    overflow: hidden;
+  }
+  .resultat-card::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--gold);
+    transform: scaleX(0);
+    transition: transform 0.4s;
+    transform-origin: left;
+  }
+  .resultat-card:hover { border-color: var(--border); }
+  .resultat-card:hover::before { transform: scaleX(1); }
+  .resultat-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3.5rem;
+    font-weight: 300;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+  .resultat-label {
+    font-size: 0.8rem;
+    color: var(--text-mid);
+    font-weight: 300;
+    line-height: 1.4;
+  }
+
+  /* FOOTER */
+  footer {
+    padding: 2rem 4rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+  }
+  footer span { color: var(--gold); }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: all 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* NAV responsive */
+  @media (max-width: 768px) {
+    nav, .project-hero, .content-section, .articulate-block, footer {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+    .contexte-grid, .slides-grid, .resultats-grid { grid-template-columns: 1fr; }
+    .demarche-steps { grid-template-columns: 1fr 1fr; }
+    .articulate-block { grid-template-columns: 1fr; }
+    .project-num { display: none; }
+    .articulate-features { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">F<span>.</span>Valle</a>
+  <a href="index.html#projets" class="nav-back">
+    <div class="nav-back-arrow"></div>
+    Retour aux projets
+  </a>
+</nav>
+
+<!-- HERO -->
+<section class="project-hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid-line"></div>
+  <p class="project-breadcrumb">Projet 004 · SDIS 33 · Master UBM</p>
+  <h1 class="project-title">Réglementation<br>relative aux <em>drones</em></h1>
+  <div class="project-meta">
+    <div class="meta-item">
+      <p class="meta-label">Commanditaire</p>
+      <p class="meta-value">SDIS 33</p>
+    </div>
+    <div class="meta-item">
+      <p class="meta-label">Contexte</p>
+      <p class="meta-value">Master UBM · 2024</p>
+    </div>
+    <div class="meta-item">
+      <p class="meta-label">Durée</p>
+      <p class="meta-value">1h30 – 2h</p>
+    </div>
+    <div class="meta-item">
+      <p class="meta-label">Outil</p>
+      <p class="meta-value">Articulate 360</p>
+    </div>
+  </div>
+  <div class="project-tags">
+    <span class="tag">Articulate 360</span>
+    <span class="tag">E-learning</span>
+    <span class="tag">Scénarisation</span>
+    <span class="tag">LMS Moodle</span>
+    <span class="tag">Ingénierie pédagogique</span>
+    <span class="tag">SDIS 33</span>
+  </div>
+  <div class="project-num">004</div>
+</section>
+
+<div class="project-body">
+
+  <!-- CONTEXTE -->
+  <section class="content-section">
+    <p class="section-label reveal">Contexte du projet</p>
+    <h2 class="section-heading reveal">Un module e-learning<br>pour les pompiers pilotes de drones</h2>
+    <div class="contexte-grid">
+      <div class="contexte-card reveal">
+        <span class="contexte-card-icon">🎯</span>
+        <p class="contexte-card-title">Objectif</p>
+        <p class="contexte-card-text">Concevoir un module e-learning complet sur la réglementation des drones pour préparer les sapeurs-pompiers du SDIS 33 à l'obtention du CATS (Certificat d'Aptitude à la Télépilotage Spécifique).</p>
+      </div>
+      <div class="contexte-card reveal">
+        <span class="contexte-card-icon">⚠️</span>
+        <p class="contexte-card-title">Problèmes identifiés</p>
+        <p class="contexte-card-text">Les apprenants passaient directement au quiz sans lire les ressources. Le contenu existant sous format PDF manquait d'interactivité et d'engagement. Les parcours n'imposaient aucun suivi structuré.</p>
+      </div>
+      <div class="contexte-card reveal">
+        <span class="contexte-card-icon">💡</span>
+        <p class="contexte-card-title">Solution</p>
+        <p class="contexte-card-text">Réingénierie complète du module en e-learning interactif via Articulate 360, découpé en mini-modules de 20 min maximum, avec activités variées, scénarios immersifs et évaluation finale de 20 questions.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- DÉMARCHE -->
+  <section class="content-section">
+    <p class="section-label reveal">Démarche</p>
+    <h2 class="section-heading reveal">De l'analyse à la production</h2>
+    <div class="demarche-steps">
+      <div class="step reveal">
+        <div class="step-dot"></div>
+        <p class="step-num">01</p>
+        <p class="step-title">Analyse & Cadrage</p>
+        <p class="step-desc">Récolte d'informations : objectifs, cible, prérequis, modalités, durée, évaluation. Étude du contenu PDF existant.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-dot"></div>
+        <p class="step-num">02</p>
+        <p class="step-title">Réingénierie pédagogique</p>
+        <p class="step-desc">Recommandations globales, redéfinition des objectifs avec taxonomie de Bloom, moodboard SDIS 33, charte graphique.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-dot"></div>
+        <p class="step-num">03</p>
+        <p class="step-title">Storyboard</p>
+        <p class="step-desc">Scénarisation complète des 5 parties + préambule + conclusion avec médias, interactions et durées estimées.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-dot"></div>
+        <p class="step-num">04</p>
+        <p class="step-title">Production Articulate</p>
+        <p class="step-desc">Développement des activités : images clicables, flashcards, mises en situation, exercices de tri, QCM final.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESSOURCES DÉVELOPPÉES -->
+  <section class="content-section">
+    <p class="section-label reveal">Ressources développées</p>
+    <h2 class="section-heading reveal">Exemples d'activités conçues</h2>
+    <p class="slides-intro reveal">Le module intègre une variété de formats interactifs pour maintenir l'engagement des apprenants tout au long des 5 parties du parcours.</p>
+    <div class="slides-grid">
+
+      <div class="slide-card reveal">
+        <div class="slide-accent"></div>
+        <div class="slide-thumb">
+          <div class="slide-thumb-pattern"></div>
+          <div class="slide-thumb-content">
+            <span class="slide-thumb-icon">🖱️</span>
+            <p class="slide-thumb-label">Image<br>clicable</p>
+          </div>
+        </div>
+        <div class="slide-info">
+          <p class="slide-type">Interaction · Hotspot</p>
+          <p class="slide-title">Caractéristiques de la catégorie spécifique</p>
+          <p class="slide-desc">Schéma interactif avec zones clicables révélant les caractéristiques (vol jour/nuit, poids, altitude…). Durée : 3 min.</p>
+        </div>
+      </div>
+
+      <div class="slide-card reveal">
+        <div class="slide-accent"></div>
+        <div class="slide-thumb">
+          <div class="slide-thumb-pattern"></div>
+          <div class="slide-thumb-content">
+            <span class="slide-thumb-icon">🎭</span>
+            <p class="slide-thumb-label">Mise en<br>situation</p>
+          </div>
+        </div>
+        <div class="slide-info">
+          <p class="slide-type">Scénario · Genially</p>
+          <p class="slide-title">Scénarios standards européens STS-01 & STS-02</p>
+          <p class="slide-desc">Deux missions interactives simulant des interventions réelles (surveillance d'accident, recherche de points chauds). Durée : 10 min.</p>
+        </div>
+      </div>
+
+      <div class="slide-card reveal">
+        <div class="slide-accent"></div>
+        <div class="slide-thumb">
+          <div class="slide-thumb-pattern"></div>
+          <div class="slide-thumb-content">
+            <span class="slide-thumb-icon">🃏</span>
+            <p class="slide-thumb-label">Flash­cards</p>
+          </div>
+        </div>
+        <div class="slide-info">
+          <p class="slide-type">Mémorisation · Flip Card</p>
+          <p class="slide-title">Définitions VLOS / BVLOS</p>
+          <p class="slide-desc">Cartes retournables pour distinguer les vols en vue directe et hors vue directe, avec vidéos explicatives. Durée : 3 min.</p>
+        </div>
+      </div>
+
+      <div class="slide-card reveal">
+        <div class="slide-accent"></div>
+        <div class="slide-thumb">
+          <div class="slide-thumb-pattern"></div>
+          <div class="slide-thumb-content">
+            <span class="slide-thumb-icon">⚖️</span>
+            <p class="slide-thumb-label">Exercice<br>de tri</p>
+          </div>
+        </div>
+        <div class="slide-info">
+          <p class="slide-type">Activité · Sorting</p>
+          <p class="slide-title">Les sous-catégories de la catégorie ouverte</p>
+          <p class="slide-desc">Tableau interactif avec activité de tri A1/A2/A3 par poids, conditions et distances. Durée : 5 min.</p>
+        </div>
+      </div>
+
+      <div class="slide-card reveal">
+        <div class="slide-accent"></div>
+        <div class="slide-thumb">
+          <div class="slide-thumb-pattern"></div>
+          <div class="slide-thumb-content">
+            <span class="slide-thumb-icon">✅</span>
+            <p class="slide-thumb-label">Cases à<br>cocher</p>
+          </div>
+        </div>
+        <div class="slide-info">
+          <p class="slide-type">Récapitulatif · Checklist</p>
+          <p class="slide-title">Points clés de chaque partie</p>
+          <p class="slide-desc">L'apprenant valide qu'il a bien retenu les informations essentielles avant de passer à la partie suivante. Durée : 4 min.</p>
+        </div>
+      </div>
+
+      <div class="slide-card reveal">
+        <div class="slide-accent"></div>
+        <div class="slide-thumb">
+          <div class="slide-thumb-pattern"></div>
+          <div class="slide-thumb-content">
+            <span class="slide-thumb-icon">📝</span>
+            <p class="slide-thumb-label">Évaluation<br>finale</p>
+          </div>
+        </div>
+        <div class="slide-info">
+          <p class="slide-type">Évaluation · QCM</p>
+          <p class="slide-title">Évaluation sommative — 20 questions</p>
+          <p class="slide-desc">Questions diversifiées, une seule tentative, ouverture fixée après le présentiel. Seuil de réussite lié à l'obtention du CATS. Durée : 20 min.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- RÉSULTATS -->
+  <section class="content-section">
+    <p class="section-label reveal">En chiffres</p>
+    <h2 class="section-heading reveal">Le module en un coup d'œil</h2>
+    <div class="resultats-grid">
+      <div class="resultat-card reveal">
+        <p class="resultat-num">5</p>
+        <p class="resultat-label">Parties thématiques + préambule & conclusion</p>
+      </div>
+      <div class="resultat-card reveal">
+        <p class="resultat-num">20</p>
+        <p class="resultat-label">Questions dans l'évaluation finale</p>
+      </div>
+      <div class="resultat-card reveal">
+        <p class="resultat-num">2h</p>
+        <p class="resultat-label">Durée totale estimée du parcours</p>
+      </div>
+      <div class="resultat-card reveal">
+        <p class="resultat-num">6+</p>
+        <p class="resultat-label">Types d'activités interactives différentes</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARTICULATE CTA -->
+  <div class="articulate-block">
+    <div class="articulate-bg"></div>
+    <div class="reveal">
+      <p class="articulate-label">Expérience complète</p>
+      <h2 class="articulate-title">Découvrir le module<br><em>Articulate</em></h2>
+      <p class="articulate-desc">Accédez à l'intégralité du module e-learning tel qu'il a été conçu et produit — navigation LMS, activités interactives et évaluation finale incluses.</p>
+      <div class="articulate-features">
+        <div class="feature-item">
+          <span class="feature-icon">▶</span>
+          <p class="feature-text">Navigation complète avec suivi de progression</p>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">◈</span>
+          <p class="feature-text">Activités interactives en situation réelle</p>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">◉</span>
+          <p class="feature-text">Scénarios immersifs SDIS 33</p>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">✦</span>
+          <p class="feature-text">Évaluation finale de 20 questions</p>
+        </div>
+      </div>
+      <a href="https://360.articulate.com/review/content/6fd0a2fc-bdf7-495e-8aec-c2ae6bd23909/review" target="_blank" class="btn-primary">
+        Ouvrir le module
+        <span class="btn-primary-arrow">→</span>
+      </a>
+    </div>
+    <div class="articulate-preview reveal">
+      <div class="preview-browser">
+        <div class="browser-bar">
+          <div class="browser-dot"></div>
+          <div class="browser-dot"></div>
+          <div class="browser-dot"></div>
+          <div class="browser-url">360.articulate.com/review/…</div>
+        </div>
+        <div class="browser-content">
+          <div class="lms-sidebar">
+            <p class="lms-title">Réglementation relative aux drones</p>
+            <div class="lms-progress"></div>
+            <div class="lms-item done"><div class="lms-check done-check"></div>PRÉAMBULE</div>
+            <div class="lms-item done"><div class="lms-check done-check"></div>PARTIE 1 : INTRODUCTION</div>
+            <div class="lms-item done"><div class="lms-check done-check"></div>PARTIE 2 : ZONES DE VOL</div>
+            <div class="lms-item done"><div class="lms-check done-check"></div>PARTIE 3 : CAT. OUVERTE</div>
+            <div class="lms-item active"><div class="lms-check active-check"></div>PARTIE 4 : CAT. SPÉCIFIQUE</div>
+            <div class="lms-item"><div class="lms-check"></div>PARTIE 5 : CAT. SPÉCIFIQUE 2</div>
+            <div class="lms-item"><div class="lms-check"></div>CONCLUSION</div>
+            <div class="lms-item"><div class="lms-check"></div>ÉVALUATION FINALE</div>
+          </div>
+          <div class="lms-main">
+            <div class="lms-content-mock">
+              <p class="lms-mock-title">Quelles sont les caractéristiques<br>de la catégorie spécifique ?</p>
+              <div class="drone-icon-mock">🚁</div>
+              <div class="lms-mock-dots">
+                <div class="lms-mock-dot active-dot"></div>
+                <div class="lms-mock-dot"></div>
+                <div class="lms-mock-dot"></div>
+                <div class="lms-mock-dot"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <span>Florian Valle</span>
+  <span>Projet 004 · SDIS 33 · 2024</span>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx + 'px';
+    cursor.style.top = my + 'px';
+  });
+
+  function animRing() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    ring.style.left = rx + 'px';
+    ring.style.top = ry + 'px';
+    requestAnimationFrame(animRing);
+  }
+  animRing();
+
+  document.querySelectorAll('a, button').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.style.transform = 'translate(-50%,-50%) scale(2.5)';
+      ring.style.transform = 'translate(-50%,-50%) scale(1.5)';
+      ring.style.borderColor = 'rgba(184,134,11,0.8)';
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.style.transform = 'translate(-50%,-50%) scale(1)';
+      ring.style.transform = 'translate(-50%,-50%) scale(1)';
+      ring.style.borderColor = 'rgba(184,134,11,0.5)';
+    });
+  });
+
+  // Reveal on scroll
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
